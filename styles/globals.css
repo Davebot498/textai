@@ -189,28 +189,63 @@ a {
   @apply bg-yellow-600 text-black;
 }
 
-/* Responsive typography */
-@media (max-width: 768px) {
+/* Enhanced responsive typography */
+@media (max-width: 640px) {
   .hero-text {
-    font-size: 36px;
-    line-height: 1.2;
+    font-size: 2.5rem;
+    line-height: 1.1;
   }
   
   .subhead-text {
-    font-size: 18px;
+    font-size: 1.125rem;
+    line-height: 1.5;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  .hero-text {
+    font-size: 3rem;
+    line-height: 1.1;
+  }
+  
+  .subhead-text {
+    font-size: 1.25rem;
+    line-height: 1.4;
   }
 }
 
 @media (min-width: 769px) and (max-width: 1024px) {
   .hero-text {
-    font-size: 56px;
+    font-size: 3.5rem;
     line-height: 1.1;
+  }
+  
+  .subhead-text {
+    font-size: 1.375rem;
+    line-height: 1.4;
   }
 }
 
-@media (min-width: 1025px) {
+@media (min-width: 1025px) and (max-width: 1280px) {
   .hero-text {
-    font-size: 72px;
+    font-size: 4.5rem;
     line-height: 1.1;
+  }
+  
+  .subhead-text {
+    font-size: 1.5rem;
+    line-height: 1.4;
+  }
+}
+
+@media (min-width: 1281px) {
+  .hero-text {
+    font-size: 5rem;
+    line-height: 1.05;
+  }
+  
+  .subhead-text {
+    font-size: 1.5rem;
+    line-height: 1.4;
   }
 }

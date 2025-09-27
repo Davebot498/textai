@@ -17,7 +17,7 @@ const Visualizer = ({
   
   const [dimensions, setDimensions] = useState({ width: 800, height: 400 });
 
-  // Particle class for smooth wave animation
+  // Enhanced Particle class for better audio visualization
   class Particle {
     constructor(x, y, index) {
       this.x = x;
@@ -25,74 +25,108 @@ const Visualizer = ({
       this.baseY = y;
       this.index = index;
       this.amplitude = 0;
-      this.frequency = 0.02 + (index * 0.001);
-      this.phase = index * 0.1;
-      this.size = Math.random() * 3 + 1;
-      this.opacity = Math.random() * 0.8 + 0.2;
+      this.frequency = 0.015 + (index * 0.0008);
+      this.phase = index * 0.08;
+      this.size = Math.random() * 4 + 2;
+      this.opacity = Math.random() * 0.9 + 0.3;
       this.color = this.getColor();
+      this.velocityY = 0;
+      this.targetY = y;
+      this.energy = 0;
     }
 
     getColor() {
       const colors = [
-        'rgba(255, 106, 0, 0.8)',   // Orange
-        'rgba(255, 140, 0, 0.6)',   // Light orange
-        'rgba(138, 43, 226, 0.4)',  // Purple
-        'rgba(75, 0, 130, 0.3)',    // Indigo
+        'rgba(255, 106, 0, 0.9)',   // Bright Orange
+        'rgba(255, 140, 0, 0.8)',   // Light orange
+        'rgba(255, 69, 0, 0.7)',    // Red orange
+        'rgba(255, 165, 0, 0.6)',   // Orange
+        'rgba(138, 43, 226, 0.5)',  // Purple
+        'rgba(75, 0, 130, 0.4)',    // Indigo
       ];
       return colors[Math.floor(Math.random() * colors.length)];
     }
 
     update(time, audioData = null) {
       if (audioData && this.index < audioData.length) {
-        // React to audio frequency data
+        // Enhanced audio reactivity
         const frequency = audioData[this.index] / 255;
-        this.amplitude = frequency * 100;
+        const bassBoost = this.index < audioData.length * 0.1 ? 1.5 : 1;
+        this.energy = frequency * bassBoost;
+        this.amplitude = this.energy * 120 + Math.sin(time * 0.003) * 20;
+        
+        // Dynamic size based on audio energy
+        this.size = Math.max(1, (this.energy * 8) + 2);
+        this.opacity = Math.min(1, 0.3 + (this.energy * 0.7));
       } else {
-        // Idle breathing animation
-        this.amplitude = Math.sin(time * 0.001 + this.phase) * 20 + 
-                        Math.sin(time * 0.002 + this.phase * 2) * 10;
+        // Enhanced idle breathing animation
+        this.energy = 0.3;
+        this.amplitude = Math.sin(time * 0.0008 + this.phase) * 25 + 
+                        Math.sin(time * 0.0015 + this.phase * 1.5) * 15 +
+                        Math.sin(time * 0.0025 + this.phase * 0.5) * 8;
+        this.size = 2 + Math.sin(time * 0.002 + this.phase) * 1;
+        this.opacity = 0.4 + Math.sin(time * 0.001 + this.phase) * 0.2;
       }
 
-      // Smooth wave motion
-      this.y = this.baseY + 
-               Math.sin(time * this.frequency + this.phase) * this.amplitude +
-               Math.sin(time * 0.001 + this.phase) * 15;
+      // Smooth wave motion with physics
+      this.targetY = this.baseY + 
+                     Math.sin(time * this.frequency + this.phase) * this.amplitude +
+                     Math.sin(time * 0.0012 + this.phase * 2) * 20;
       
-      // Subtle horizontal drift
-      this.x += Math.sin(time * 0.0005 + this.phase) * 0.5;
+      // Smooth interpolation for natural movement
+      this.velocityY += (this.targetY - this.y) * 0.02;
+      this.velocityY *= 0.85; // Damping
+      this.y += this.velocityY;
       
-      // Keep particles within bounds
-      if (this.x < 0) this.x = dimensions.width;
-      if (this.x > dimensions.width) this.x = 0;
+      // Enhanced horizontal drift with bounds checking
+      const driftAmount = Math.sin(time * 0.0008 + this.phase) * 0.8 + 
+                         Math.sin(time * 0.0003 + this.phase * 3) * 0.3;
+      this.x += driftAmount;
+      
+      // Smooth bounds wrapping
+      if (this.x < -20) this.x = dimensions.width + 20;
+      if (this.x > dimensions.width + 20) this.x = -20;
     }
 
     draw(ctx) {
       ctx.save();
       ctx.globalAlpha = this.opacity;
-      ctx.fillStyle = this.color;
       
-      // Draw particle with glow effect
-      ctx.shadowBlur = 20;
+      // Enhanced glow effect based on energy
+      const glowIntensity = Math.max(10, this.energy * 40);
+      ctx.shadowBlur = glowIntensity;
       ctx.shadowColor = this.color;
+      
+      // Draw main particle
+      ctx.fillStyle = this.color;
       ctx.beginPath();
       ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
       ctx.fill();
+      
+      // Draw inner bright core
+      if (this.energy > 0.5) {
+        ctx.shadowBlur = 5;
+        ctx.fillStyle = `rgba(255, 255, 255, ${this.energy * 0.3})`;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size * 0.4, 0, Math.PI * 2);
+        ctx.fill();
+      }
       
       ctx.restore();
     }
   }
 
-  // Initialize particles
+  // Initialize particles with better distribution
   const initializeParticles = useCallback(() => {
     if (!canvasRef.current) return;
     
     const canvas = canvasRef.current;
-    const particleCount = Math.floor(canvas.width / 8); // Responsive particle density
+    const particleCount = Math.min(150, Math.floor(canvas.width / 6)); // Better density control
     const particles = [];
     
     for (let i = 0; i < particleCount; i++) {
       const x = (i / particleCount) * canvas.width;
-      const y = canvas.height / 2;
+      const y = canvas.height / 2 + (Math.random() - 0.5) * 100; // Add some vertical spread
       particles.push(new Particle(x, y, i));
     }
     
@@ -112,8 +146,8 @@ const Visualizer = ({
         sourceRef.current = audioContextRef.current.createMediaElementSource(audioElement);
         
         analyserRef.current = audioContextRef.current.createAnalyser();
-        analyserRef.current.fftSize = 256; // Lower for better performance
-        analyserRef.current.smoothingTimeConstant = 0.85;
+        analyserRef.current.fftSize = 512; // Better frequency resolution
+        analyserRef.current.smoothingTimeConstant = 0.8; // More responsive
         
         sourceRef.current.connect(analyserRef.current);
         analyserRef.current.connect(audioContextRef.current.destination);
@@ -135,8 +169,9 @@ const Visualizer = ({
     const time = Date.now();
     timeRef.current = time;
 
-    // Clear canvas with subtle background
-    ctx.fillStyle = 'rgba(11, 11, 13, 0.1)';
+    // Clear canvas with dynamic background based on audio
+    const bgAlpha = isPlaying ? 0.05 : 0.08;
+    ctx.fillStyle = `rgba(11, 11, 13, ${bgAlpha})`;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // Get audio data if available
@@ -152,24 +187,31 @@ const Visualizer = ({
       particle.draw(ctx);
     });
 
-    // Draw connecting lines between nearby particles for wave effect
+    // Draw enhanced connecting lines with dynamic opacity
     ctx.save();
-    ctx.strokeStyle = 'rgba(255, 106, 0, 0.1)';
     ctx.lineWidth = 1;
-    ctx.beginPath();
     
     for (let i = 0; i < particlesRef.current.length - 1; i++) {
       const current = particlesRef.current[i];
       const next = particlesRef.current[i + 1];
       const distance = Math.abs(current.x - next.x);
       
-      if (distance < 100) {
+      if (distance < 120) {
+        const avgEnergy = (current.energy + next.energy) / 2;
+        const opacity = Math.max(0.05, avgEnergy * 0.3);
+        const gradient = ctx.createLinearGradient(current.x, current.y, next.x, next.y);
+        gradient.addColorStop(0, `rgba(255, 106, 0, ${opacity})`);
+        gradient.addColorStop(0.5, `rgba(255, 140, 0, ${opacity * 1.2})`);
+        gradient.addColorStop(1, `rgba(255, 106, 0, ${opacity})`);
+        
+        ctx.strokeStyle = gradient;
+        ctx.beginPath();
         ctx.moveTo(current.x, current.y);
         ctx.lineTo(next.x, next.y);
+        ctx.stroke();
       }
     }
     
-    ctx.stroke();
     ctx.restore();
 
     animationRef.current = requestAnimationFrame(animate);
