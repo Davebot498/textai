@@ -1,0 +1,16 @@
+# This is a placeholder for the synth pad atmosphere audio file
+# In a real implementation, you would place an actual MP3 file here
+# For demo purposes, this file represents where the ambient synth pad audio would be stored
+
+# To add real atmosphere files:
+# 1. Create or source royalty-free ambient synth pad (10-30 seconds, loopable)
+# 2. Convert to MP3 format, optimized for web (128kbps recommended)
+# 3. Replace this placeholder with the actual audio file
+# 4. Ensure the file is under 1MB for fast loading
+
+# Suggested synth pad characteristics:
+# - Soft, ambient tones
+# - Slow attack and release
+# - Warm, ethereal quality
+# - Seamlessly loopable
+# - Low to mid frequency range

@@ -1,0 +1,15 @@
+# This is a placeholder for the cafe atmosphere audio file
+# In a real implementation, you would place an actual MP3 file here
+# For demo purposes, this file represents where the cafe ambience audio would be stored
+
+# To add real atmosphere files:
+# 1. Record or source royalty-free cafe audio (10-30 seconds, loopable)
+# 2. Convert to MP3 format, optimized for web (128kbps recommended)
+# 3. Replace this placeholder with the actual audio file
+# 4. Ensure the file is under 1MB for fast loading
+
+# Suggested cafe sounds:
+# - Light chatter and coffee machine sounds
+# - Gentle background music
+# - Clinking of cups and dishes
+# - Ambient cafe atmosphere
